@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  drive-uploader:
+    build: .
+    container_name: drive-uploader-app
+    ports:
+      - "5050:5050"
+    environment:
+      - NODE_ENV=production
+      - PORT=5050
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      # Mount .env file if you want to update it without rebuilding
+      - ./.env:/app/.env:ro
+    networks:
+      - drive-uploader-network
+
+networks:
+  drive-uploader-network:
+    driver: bridge

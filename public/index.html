@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Drive Uploader">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; object-src 'none'; connect-src 'self' http://192.168.18.5:5050 https://cdnjs.cloudflare.com; img-src 'self' data: content: http://192.168.18.5:5050;">
+    <title>Drive Uploader</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #f8f9fa;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+        }
+
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .main-content {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .input-label i {
+            margin-right: 8px;
+            color: #667eea;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .message {
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%);
+            color: #155724;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+            color: #721c24;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .image-info {
+            padding: 12px;
+        }
+
+        .image-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .image-meta {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 8px;
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .loading i {
+            font-size: 32px;
+            margin-bottom: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .images-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 12px;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>Drive Uploader</span>
+            <span>
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-three-quarters"></i>
+            </span>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-cloud-upload-alt"></i> Drive Uploader</h1>
+            <p>Upload & manage your images</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Upload Card -->
+            <div class="card fade-in">
+                <div class="section-title">
+                    <i class="fas fa-plus-circle"></i>
+                    Upload New Image
+                </div>
+                
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <div class="input-label">
+                            <i class="fas fa-user"></i>
+                            User ID
+                        </div>
+                        <input type="text" id="userId" name="userId" class="text-input" placeholder="Enter your user ID" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <i class="fas fa-image"></i>
+                            Select Image
+                        </div>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">Tap to select image</div>
+                            <div class="upload-subtext">JPG, PNG, GIF up to 10MB</div>
+                            <input type="file" id="imageFile" name="image" accept="image/*" class="file-input" required>
+                        </div>
+                        <div id="selectedFileName" style="margin-top: 12px; color: #667eea; font-weight: 500;"></div>
+                    </div>
+                    
+                    <button type="submit" id="uploadBtn" class="btn btn-primary">
+                        <i class="fas fa-upload"></i>
+                        Upload Image
+                    </button>
+                </form>
+                
+                <div id="message"></div>
+            </div>
+
+            <!-- Images Section -->
+            <div class="card fade-in">
+                <div class="section-title">
+                    <i class="fas fa-images"></i>
+                    Your Images
+                    <span class="badge" id="imageCount">0</span>
+                </div>
+                
+                <button onclick="loadUserImages()" id="loadImagesBtn" class="btn btn-secondary">
+                    <i class="fas fa-sync-alt"></i>
+                    Load My Images
+                </button>
+                
+                <div id="imagesContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const messageDiv = document.getElementById('message');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const imagesContainer = document.getElementById('imagesContainer');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const imageFile = document.getElementById('imageFile');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const imageCount = document.getElementById('imageCount');
+
+        // File upload area interactions
+        fileUploadArea.addEventListener('click', () => {
+            imageFile.click();
+        });
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                imageFile.files = files;
+                updateFileName(files[0]);
+            }
+        });
+
+        imageFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                updateFileName(e.target.files[0]);
+            }
+        });
+
+        function updateFileName(file) {
+            selectedFileName.innerHTML = `
+                <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                Selected: ${file.name} (${Math.round(file.size / 1024)} KB)
+            `;
+        }
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const userId = document.getElementById('userId').value;
+            const imageFileInput = document.getElementById('imageFile').files[0];
+            
+            if (!userId || !imageFileInput) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            formData.append('userId', userId);
+            formData.append('image', imageFileInput);
+
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            
+            try {
+                let response, result;
+                
+                if (AppConfig.IS_MOBILE_APP && window.CapacitorHttp) {
+                    // Use Capacitor HTTP for mobile app (bypasses Mixed Content restrictions)
+                    console.log('Using Capacitor HTTP for upload');
+                    
+                    // For now, let's try a simple approach - convert file to base64
+                    const reader = new FileReader();
+                    const base64Promise = new Promise((resolve) => {
+                        reader.onload = () => resolve(reader.result.split(',')[1]);
+                        reader.readAsDataURL(imageFileInput);
+                    });
+                    const base64Data = await base64Promise;
+                    
+                    response = await window.CapacitorHttp.request({
+                        url: `${AppConfig.getServerUrl()}/upload`,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        data: {
+                            userId: userId,
+                            imageData: base64Data,
+                            fileName: imageFileInput.name,
+                            mimeType: imageFileInput.type
+                        }
+                    });
+                    result = response.data;
+                } else {
+                    // Use regular fetch for web browser
+                    console.log('Using regular fetch for upload');
+                    response = await fetch(`${AppConfig.getServerUrl()}/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    result = await response.json();
+                }
+
+                if (result.success) {
+                    showMessage(`✅ Upload successful! File saved to Google Drive: ${result.driveFile.name}`, 'success');
+                    uploadForm.reset();
+                    selectedFileName.innerHTML = '';
+                    loadUserImages(); // Refresh images
+                } else {
+                    showMessage(`❌ Upload failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`❌ Upload failed: ${error.message}`, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
+            }
+        });
+
+        function showMessage(text, type) {
+            const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+            messageDiv.innerHTML = `<div class="message ${type}"><i class="${icon}"></i>${text}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        async function loadUserImages() {
+            const userId = document.getElementById('userId').value;
+            
+            if (!userId) {
+                showMessage('Please enter a User ID first', 'error');
+                return;
+            }
+
+            const loadBtn = document.getElementById('loadImagesBtn');
+            loadBtn.disabled = true;
+            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+            imagesContainer.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <div>Loading your images...</div>
+                </div>
+            `;
+
+            try {
+                let response, result;
+                
+                if (AppConfig.IS_MOBILE_APP && window.CapacitorHttp) {
+                    // Use Capacitor HTTP for mobile app
+                    console.log('Using Capacitor HTTP for loading images');
+                    response = await window.CapacitorHttp.request({
+                        url: `${AppConfig.getServerUrl()}/user/${userId}/images`,
+                        method: 'GET'
+                    });
+                    result = response.data;
+                } else {
+                    // Use regular fetch for web browser
+                    console.log('Using regular fetch for loading images');
+                    response = await fetch(`${AppConfig.getServerUrl()}/user/${userId}/images`);
+                    result = await response.json();
+                }
+
+                if (result.images && result.images.length > 0) {
+                    imageCount.textContent = result.images.length;
+                    
+                    const imageGrid = result.images.map(image => `
+                        <div class="image-card fade-in">
+                            <img src="${image.publicUrl}" alt="${image.name}" loading="lazy" 
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTllY2VmIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjxpIGNsYXNzPSJmYXMgZmEtaW1hZ2UiPjwvaT4gSW1hZ2UgVW5hdmFpbGFibGU8L3RleHQ+PC9zdmc+'; this.style.opacity='0.7';">
+                            <div class="image-info">
+                                <div class="image-name" title="${image.name}">
+                                    <i class="fas fa-file-image"></i> ${image.name}
+                                </div>
+                                <div class="image-meta">
+                                    <div><i class="fas fa-calendar"></i> ${new Date(image.uploadTime).toLocaleDateString()}</div>
+                                    <div><i class="fas fa-weight"></i> ${image.size ? Math.round(image.size / 1024) + ' KB' : 'Unknown'}</div>
+                                </div>
+                                <div class="image-actions">
+                                    <a href="${image.webViewLink}" target="_blank" class="btn-small">
+                                        <i class="fas fa-external-link-alt"></i> View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    imagesContainer.innerHTML = `
+                        <div class="images-grid">
+                            ${imageGrid}
+                        </div>
+                    `;
+                } else {
+                    imageCount.textContent = '0';
+                    imagesContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-images"></i>
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No images found</div>
+                            <div>Upload some images to get started!</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                imagesContainer.innerHTML = `
+                    <div class="message error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error loading images: ${error.message}
+                    </div>
+                `;
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Load My Images';
+            }
+        }
+
+        // Auto-load images when user ID changes
+        document.getElementById('userId').addEventListener('blur', () => {
+            const userId = document.getElementById('userId').value;
+            if (userId) {
+                loadUserImages();
+            }
+        });
+
+        // Add some mobile-like interactions
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add touch feedback to buttons
+            const buttons = document.querySelectorAll('.btn, .btn-small');
+            buttons.forEach(btn => {
+                btn.addEventListener('touchstart', () => {
+                    btn.style.transform = 'scale(0.95)';
+                });
+                btn.addEventListener('touchend', () => {
+                    btn.style.transform = '';
+                });
+            });
+
+            // Simulate loading state on app start
+            setTimeout(() => {
+                document.querySelectorAll('.fade-in').forEach((el, index) => {
+                    el.style.animationDelay = `${index * 0.1}s`;
+                });
+            }, 100);
+        });
+    </script>
+    
+    <!-- Capacitor Script -->
+    <script type="module" src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>
+    <script>
+        // Initialize Capacitor when available
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.Capacitor) {
+                console.log('Running in Capacitor mobile app');
+                // Import built-in CapacitorHttp (no plugin needed)
+                window.CapacitorHttp = window.Capacitor.Plugins.CapacitorHttp;
+            } else {
+                console.log('Running in web browser');
+            }
+        });
+    </script>
+</body>
+</html>

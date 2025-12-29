@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env.example
+Dockerfile
+.dockerignore
+android/
+capacitor.config.ts
+build-*.md
+deploy-guide.md
+ecosystem.config.js
